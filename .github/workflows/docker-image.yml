@@ -12,11 +12,4 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build --file Dockerfile --tag ozempic-results-api:$(date +%s) \ 
-            --build-arg mongo_uri=${{ secrets.MONGO_URI }} \
-            --build-arg database_name=${{ secrets.DATABASE_NAME }} \
-            --build-arg bucket_name=${{ secrets.BUCKET_NAME }} \
-            --build-arg s3_access_key_id=${{ secrets.S3_ACCESS_KEY_ID }} \
-            --build-arg s3_secret_access_key=${{ secrets.S3_SECRET_ACCESS_KEY }} \
-            --build-arg s3_endpoint_url=${{ secrets.S3_ENDPONT_URL }} \
-            --build-arg api_key=${{ secrets.API_KEY }} .
+      run: docker build --file Dockerfile --tag ozempic-results-api:$(date +%s) --build-arg mongo_uri=${{ secrets.MONGO_URI }} --build-arg database_name=${{ secrets.DATABASE_NAME }} --build-arg bucket_name=${{ secrets.BUCKET_NAME }} --build-arg s3_access_key_id=${{ secrets.S3_ACCESS_KEY_ID }} --build-arg s3_secret_access_key=${{ secrets.S3_SECRET_ACCESS_KEY }} --build-arg s3_endpoint_url=${{ secrets.S3_ENDPONT_URL }} --build-arg api_key=${{ secrets.API_KEY }} .
