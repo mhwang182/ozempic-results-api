@@ -24,4 +24,4 @@ app.config['S3_ENDPOINT_URL'] = os.getenv("S3_ENDPOINT_URL")
 app.config['API_KEY'] = os.getenv("API_KEY")
 
 if __name__ == '__main__':
-    app.run(port=5000)
+    app.run(host='0.0.0.0', port=8080)
