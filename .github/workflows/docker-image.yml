@@ -8,7 +8,7 @@ env:
   DOCKER_USER: ${{secrets.DOCKER_USER}}
   DOCKER_PASSWORD: ${{secrets.DOCKER_PASS}}
   REPO_NAME: ozempic-results
-  IMAGE_NAME: ozempic-results-api:$(date +%s)
+  
 
 jobs:
   build:
@@ -21,4 +21,6 @@ jobs:
       
       - uses: actions/checkout@v4
       - name: Build the Docker image
-        run: docker build --file Dockerfile --tag ozempic-results-api:$(date +%s) --build-arg mongo_uri=${{ secrets.MONGO_URI }} --build-arg database_name=${{ secrets.DATABASE_NAME }} --build-arg bucket_name=${{ secrets.BUCKET_NAME }} --build-arg s3_access_key_id=${{ secrets.S3_ACCESS_KEY_ID }} --build-arg s3_secret_access_key=${{ secrets.S3_SECRET_ACCESS_KEY }} --build-arg s3_endpoint_url=${{ secrets.S3_ENDPONT_URL }} --build-arg api_key=${{ secrets.API_KEY }} .
+        env: 
+          IMAGE_NAME: ozempic-results-api:$(date +%s)
+        run: docker build --file Dockerfile --tag $IMAGE_NAME --build-arg mongo_uri=${{ secrets.MONGO_URI }} --build-arg database_name=${{ secrets.DATABASE_NAME }} --build-arg bucket_name=${{ secrets.BUCKET_NAME }} --build-arg s3_access_key_id=${{ secrets.S3_ACCESS_KEY_ID }} --build-arg s3_secret_access_key=${{ secrets.S3_SECRET_ACCESS_KEY }} --build-arg s3_endpoint_url=${{ secrets.S3_ENDPONT_URL }} --build-arg api_key=${{ secrets.API_KEY }} .
