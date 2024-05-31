@@ -6,7 +6,7 @@ on:
 
 env:
   DOCKER_USER: ${{secrets.DOCKER_USER}}
-  DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+  DOCKER_PASSWORD: ${{secrets.DOCKER_PASS}}
   REPO_NAME: ozempic-results
   IMAGE_NAME: ozempic-results-api:$(date +%s)
 
