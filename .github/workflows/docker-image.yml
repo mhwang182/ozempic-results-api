@@ -34,5 +34,5 @@ jobs:
       - name: Docker Push
         env:
           IMAGE_NAME: ozempic-results-api:${{ steps.date.outputs.date }}
-        run: docker push mhwang5/ozempic-results:IMAGE_NAME
+        run: docker push mhwang5/ozempic-results:$IMAGE_NAME
         
