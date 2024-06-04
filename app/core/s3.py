@@ -14,6 +14,7 @@ def upload_image_s3(image, filename):
             ExtraArgs={'ContentType': image.content_type}
         )
     except Exception as e:
+        print('image upload error')
         print(str(e))
         return False
     return True
@@ -32,6 +33,7 @@ def get_presigned_url(imageId):
             ExpiresIn=3600
         )
     except Exception as e:
+        print('presigned url error')
         print(str(e))
 
     return url
