@@ -23,9 +23,5 @@ app.config['S3_SECRET_ACCESS_KEY'] = os.getenv("S3_SECRET_ACCESS_KEY")
 app.config['S3_ENDPOINT_URL'] = os.getenv("S3_ENDPOINT_URL")
 app.config['API_KEY'] = os.getenv("API_KEY")
 
-print(app.config['S3_ACCESS_KEY_ID'])
-print(app.config['S3_SECRET_ACCESS_KEY'])
-print(app.config['S3_ENDPOINT_URL'])
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
