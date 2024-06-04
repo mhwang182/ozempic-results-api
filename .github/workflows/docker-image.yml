@@ -30,7 +30,7 @@ jobs:
       - name: Build the Docker image
         env:
           IMAGE_TAG: mhwang5/ozempic-results:${{ steps.date.outputs.date }}
-        run: docker build --file Dockerfile --tag $IMAGE_TAG --build-arg mongo_uri=${{ secrets.MONGO_URI }} --build-arg database_name=${{ secrets.DATABASE_NAME }} --build-arg bucket_name=${{ secrets.BUCKET_NAME }} --build-arg s3_access_key_id=${{ secrets.S3_ACCESS_KEY_ID }} --build-arg s3_secret_access_key=${{ secrets.S3_SECRET_ACCESS_KEY }} --build-arg s3_endpoint_url=${{ secrets.S3_ENDPOINT_URL }} --build-arg api_key=${{ secrets.API_KEY }} .
+        run: docker build --file Dockerfile --tag $IMAGE_TAG --platform linux/amd64,linux/arm64 --build-arg mongo_uri=${{ secrets.MONGO_URI }} --build-arg database_name=${{ secrets.DATABASE_NAME }} --build-arg bucket_name=${{ secrets.BUCKET_NAME }} --build-arg s3_access_key_id=${{ secrets.S3_ACCESS_KEY_ID }} --build-arg s3_secret_access_key=${{ secrets.S3_SECRET_ACCESS_KEY }} --build-arg s3_endpoint_url=${{ secrets.S3_ENDPOINT_URL }} --build-arg api_key=${{ secrets.API_KEY }} .
       - name: Docker Push
         env:
           IMAGE_TAG: mhwang5/ozempic-results:${{ steps.date.outputs.date }}
