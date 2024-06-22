@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from flask_cors import CORS
 
 from app.auth.api_key_middleware import api_key_required
+from app.auth.signup_code_middleware import signup_code_required
 from app.core.db import find_user_by, getUser
 from app.user.user_service import create_user, login_user
 
@@ -36,12 +37,13 @@ def login():
 
 @user_api.route('', methods=['POST'])
 @api_key_required
+@signup_code_required
 def createUser():
-    print(request.get_json())
 
-    new_user_dto =request.get_json()["user"]
+    new_user_dto = request.get_json()["user"]
 
     user = find_user_by(new_user_dto["email"], new_user_dto["username"])
+
     if(user):
         return {
             "message": "user already exists",

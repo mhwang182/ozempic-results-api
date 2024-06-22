@@ -11,17 +11,23 @@ def getUser(email):
     return user
 
 def find_user_by(email, username):
-    user = None
     try:
-        user = db.Users.aggregate([
+        users = db.Users.aggregate([
             {
                 '$match': {'$or': [{'email': email}, {'username': username}]}
             }
         ])
+        users = list(users)
+
+        if(len(users) == 0):
+            return None
+        
+        return users[0]
+            
     except Exception as e:
         print(str(e))
     
-    return user
+    return {}
     
 
 def add_user(new_user, hashed_password):
@@ -39,88 +45,6 @@ def add_user(new_user, hashed_password):
         print(str(e))
     
     return objectId
-
-def add_post(new_post_doc):
-    print('trying post to mongo')
-    postId = None
-    try: 
-        postId = db.Posts.insert_one(new_post_doc).inserted_id
-    except Exception as e: 
-        print(str(e))
-
-    return postId
-
-def get_posts(userId):
-    posts = []
-    try:
-        # posts = db.Posts.find({"userId": userId})
-        posts = db.Posts.aggregate([
-            {
-                '$match': { 'userId': ObjectId(userId) },
-            },
-            {
-                '$lookup': {
-                    'from': 'Users',
-                    'localField': 'userId',
-                    'foreignField': '_id',
-                    'as': 'user_object'
-                }
-            },
-            {
-                '$set': {
-                    'userDetails': {
-                        'username': {'$arrayElemAt': ['$user_object.username', 0]}
-                    }
-                }
-            },
-            {
-                '$unset': 'user_object'
-            },
-            {
-                '$sort': {'createdAt': -1}
-            }
-        ])
-    except Exception as e:
-        print(str(e))  
-
-    return posts  
-
-def get_feed(date):
-    posts = []
-    try:
-        posts = db.Posts.aggregate([{
-            '$facet' : {
-                'metaData': [ {'$count': 'totalCount'} ],
-                'data': [
-                    {'$sort': {'createdAt': -1}}, 
-                    {
-                        '$match': {'createdAt': {'$lt': dateutil.parser.parse(date)}}
-                    },
-                    {'$limit': 6},
-                    {
-                        '$lookup': {
-                            'from': 'Users',
-                            'localField': 'userId',
-                            'foreignField': '_id',
-                            'as': 'user_object'
-                        }
-                    },
-                    {
-                        '$set': {
-                            'userDetails': {
-                                'username': {'$arrayElemAt': ['$user_object.username', 0]}
-                            }
-                        }
-                    },
-                    {
-                        '$unset': 'user_object'
-                    }
-                ]
-            }
-        }])
-    except Exception as e:
-        print(str(e))
-    return posts
 
 def get_db():
     uri = current_app.config['MONGO_URI']

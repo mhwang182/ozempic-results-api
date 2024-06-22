@@ -17,22 +17,19 @@ def token_required(func):
     def before_func(*args, **kwargs):
 
         if('Authorization' not in request.headers):
-            print('auth token not found')
             return get_error_response("Access Token not found", "Unauthorized")
-        
+                
         token_split = request.headers['Authorization'].split(" ")
         if(len(token_split ) < 2):
-            print('auth token wrong format')
             return get_error_response("Incorrect Access Token", "Unauthorized")
         
         jwt_section = token_split[1]
 
         try:
-            decode_token = jwt.decode(jwt_section, 'secret', algorithms=["HS256"])
-            if(decode_token):
-                return func(*args, **kwargs)
+            jwt.decode(jwt_section, 'secret', algorithms=["HS256"])
         except Exception as e:
-            print('auth token incorrect')
             return get_error_response("", str(e))
+        
+        return func(*args, **kwargs)
         
     return before_func

@@ -5,7 +5,7 @@ from datetime import datetime
 import blurhash
 from bson.objectid import ObjectId
 
-from app.core.db import add_post, get_feed, get_posts
+from app.core.post_methods import add_post
 from app.core.s3 import get_presigned_url, upload_image_s3
 
 
@@ -49,34 +49,15 @@ def create_post(beforeImageId, afterImageId, postDetails):
     postId = add_post(new_post_doc)
     return str(postId)
 
-def get_user_posts(userId):
-    posts_data = []
-    posts = get_posts(userId)
-    
-    for post in posts:
-        post["beforeImageUrl"] = get_presigned_url(post["beforeImageId"])
-        post["afterImageUrl"] = get_presigned_url(post["afterImageId"])
-        post["_id"] = str(post["_id"])
-        post["userId"] = str(post["userId"])
-        posts_data.append(post)
+def transform_posts(posts):
 
-    return posts_data
-
-def get_feed_posts(date):
-
-    posts_data = []
-    data = get_feed(date)
-    if(not data):
-        return posts_data
-    
-    parsed_data = list(data)[0]
-    posts = parsed_data["data"]
+    transformed_posts = []
 
     for post in posts:
         post["beforeImageUrl"] = get_presigned_url(post["beforeImageId"])
         post["afterImageUrl"] = get_presigned_url(post["afterImageId"])
         post["_id"] = str(post["_id"])
         post["userId"] = str(post["userId"])
-        posts_data.append(post)
+        transformed_posts.append(post)
     
-    return posts_data
+    return transformed_posts

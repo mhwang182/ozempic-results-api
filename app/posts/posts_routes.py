@@ -3,12 +3,15 @@ from flask_cors import CORS
 
 from app.auth.api_key_middleware import api_key_required
 from app.auth.auth_middleware import token_required
-from app.posts.posts_service import (
-    create_post,
-    get_feed_posts,
-    get_user_posts,
-    upload_post_image,
+from app.common.utils import create_response
+from app.core.post_methods import (
+    delete_post_from_db,
+    find_post,
+    get_feed_from_db,
+    get_user_posts_from_db,
+    search_posts,
 )
+from app.posts.posts_service import create_post, transform_posts, upload_post_image
 
 posts_api = Blueprint("posts_api", "posts_api", url_prefix="/posts")
 
@@ -59,7 +62,13 @@ def addPost():
 def getUserPosts():
     data = request.get_json()
 
-    posts = get_user_posts(data["userId"])
+    if( "userId" not in data):
+        return {
+            "data": None
+        }, 401
+    
+    posts = get_user_posts_from_db(data["userId"])
+    posts = transform_posts(posts)
 
     return {
         "data": {"posts": posts}
@@ -69,9 +78,62 @@ def getUserPosts():
 @api_key_required
 def get_feed():
     data = request.get_json()
-    posts = get_feed_posts(data["date"])
+
+    if ("date" not in data):
+        return create_response("date not found", None, None), 401
+
+    posts_aggregate_cursor = get_feed_from_db(data["date"])
+    parsed_data = (list(posts_aggregate_cursor)[0])["data"]
+
+    posts = transform_posts(parsed_data)
+
+    return create_response("feed posts", {"posts": posts}, None), 200
+
+@posts_api.route("/delete", methods=["POST"])
+@token_required
+@api_key_required
+def delete_post():
+    data = request.get_json()
+
+    if("postId" not in data or "userId" not in data):
+        return create_response("", None, None), 401
+    
+    post = find_post(data["postId"])
+
+    if(not post):
+        return create_response("", None, None), 404
+    
+    if(str(post["userId"]) != data["userId"]):
+        return create_response("", None, None), 401
+    
+    delete_count = delete_post_from_db(data["postId"])
+
+    if(delete_count == 0):
+        return create_response("Unable to delete post", None, None), 404
+
+    return create_response("Successfully deleted post", None, None), 200
+
+@posts_api.route("/search", methods=["POST"])
+@api_key_required
+def get_search_results_by_medication():
+
+    data = request.get_json()
+
+    if("searchTerm" not in data):
+        return {
+            "data": None
+        }, 401
+
+    search_term = data["searchTerm"]
+
+    pagination_token = None
+    if("paginationToken" in data):
+        pagination_token = data["paginationToken"]
+
+    posts_aggregate_cursor = search_posts(search_term, pagination_token)
+
+    posts = transform_posts(list(posts_aggregate_cursor))
 
     return {
-        "message": "feed posts",
-        "data": {"posts": posts}
+        "data": { "posts": posts }
     }, 200
