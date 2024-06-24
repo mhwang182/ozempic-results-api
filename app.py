@@ -4,13 +4,11 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 
-from app.posts.posts_routes import posts_api
-
 app = Flask(__name__)
 CORS(app, support_credentials=True)
 
 # app.register_blueprint(user_api)
-app.register_blueprint(posts_api)
+# app.register_blueprint(posts_api) 
 # app.register_blueprint(reviews_api)
 
 @app.route("/ping", methods=["GET"])

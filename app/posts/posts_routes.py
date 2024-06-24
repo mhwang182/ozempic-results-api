@@ -13,7 +13,7 @@ from app.core.post_methods import (
 )
 from app.posts.posts_service import create_post, transform_posts, upload_post_image
 
-posts_api = Blueprint("posts_api", "posts_api", url_prefix="/posts")
+posts_api = Blueprint("posts_api", __name__, url_prefix="/posts")
 
 CORS(posts_api)
 
