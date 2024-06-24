@@ -19,6 +19,10 @@ app.register_blueprint(reviews_api)
 def health_check():
     return {}, 200
 
+@app.route("/")
+def home():
+    return "Hello world"
+
 load_dotenv()
 
 app.config['MONGO_URI'] = os.getenv("MONGO_URI")
