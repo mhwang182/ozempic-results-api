@@ -23,8 +23,6 @@ def home():
 
 load_dotenv()
 
-#test
-
 app.config['MONGO_URI'] = os.getenv("MONGO_URI")
 app.config['DATABASE_NAME'] = os.getenv("DATABASE_NAME")
 app.config['BUCKET_NAME'] = os.getenv("BUCKET_NAME")
