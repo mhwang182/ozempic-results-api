@@ -31,4 +31,4 @@ app.config['API_KEY'] = os.getenv("API_KEY")
 app.config['SIGN_UP_CODE'] = os.getenv("SIGN_UP_CODE")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    app.run()
