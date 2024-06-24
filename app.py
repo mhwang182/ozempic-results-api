@@ -29,3 +29,6 @@ app.config['S3_SECRET_ACCESS_KEY'] = os.getenv("S3_SECRET_ACCESS_KEY")
 app.config['S3_ENDPOINT_URL'] = os.getenv("S3_ENDPOINT_URL")
 app.config['API_KEY'] = os.getenv("API_KEY")
 app.config['SIGN_UP_CODE'] = os.getenv("SIGN_UP_CODE")
+
+if __name__ == '__main__':
+    app.run()
