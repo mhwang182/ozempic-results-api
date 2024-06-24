@@ -15,6 +15,10 @@ app.register_blueprint(user_api)
 app.register_blueprint(posts_api)
 app.register_blueprint(reviews_api)
 
+@app.route("/ping", methods=["GET"])
+def health_check():
+    return {}, 200
+
 load_dotenv()
 
 app.config['MONGO_URI'] = os.getenv("MONGO_URI")
