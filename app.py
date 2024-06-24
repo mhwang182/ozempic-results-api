@@ -8,10 +8,12 @@ app = Flask(__name__)
 CORS(app, support_credentials=True)
 
 from app.posts.posts_routes import posts_api
+from app.reviews.reviews_routes import reviews_api
+from app.user.user_routes import user_api
 
-# app.register_blueprint(user_api)
+app.register_blueprint(user_api)
 app.register_blueprint(posts_api) 
-# app.register_blueprint(reviews_api)
+app.register_blueprint(reviews_api)
 
 @app.route("/ping", methods=["GET"])
 def health_check():
