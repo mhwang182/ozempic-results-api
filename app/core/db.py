@@ -1,5 +1,3 @@
-import dateutil.parser
-from bson.objectid import ObjectId
 from flask import current_app, g
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -10,11 +8,23 @@ def getUser(email):
     user = db.Users.find_one({"email": email})
     return user
 
-def find_user_by(email, username):
+def find_user_by(email, username, userId):
+
+    fields = []
+    if(email):
+        fields.append({'email': email})
+    
+    if(username):
+        fields.append({'username': username})
+    
+    if(userId):
+        fields.append({'_id': userId})
+
+    print(fields)
     try:
         users = db.Users.aggregate([
             {
-                '$match': {'$or': [{'email': email}, {'username': username}]}
+                '$match': {'$or': fields}
             }
         ])
         users = list(users)

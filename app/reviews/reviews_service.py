@@ -19,11 +19,15 @@ def create_review(reviewData):
 
     return str(review_id)
 
+def transform_review(review):
+    
+    review["_id"] = str(review["_id"])
+    review["userId"] = str(review["userId"])
+    return review
+
 def transform_reviews(reviews):
 
     review_data = []
     for review in reviews:
-        review["_id"] = str(review["_id"])
-        review["userId"] = str(review["userId"])
-        review_data.append(review)
+        review_data.append(transform_review(review))
     return review_data

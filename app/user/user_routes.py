@@ -42,7 +42,7 @@ def createUser():
 
     new_user_dto = request.get_json()["user"]
 
-    user = find_user_by(new_user_dto["email"], new_user_dto["username"])
+    user = find_user_by(new_user_dto["email"], new_user_dto["username"], None)
 
     if(user):
         return {

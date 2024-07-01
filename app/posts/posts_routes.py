@@ -1,9 +1,11 @@
+from bson import ObjectId
 from flask import Blueprint, request
 from flask_cors import CORS
 
 from app.auth.api_key_middleware import api_key_required
 from app.auth.auth_middleware import token_required
 from app.common.utils import create_response
+from app.core.db import find_user_by
 from app.core.post_methods import (
     delete_post_from_db,
     find_post,
@@ -11,7 +13,12 @@ from app.core.post_methods import (
     get_user_posts_from_db,
     search_posts,
 )
-from app.posts.posts_service import create_post, transform_posts, upload_post_image
+from app.posts.posts_service import (
+    create_post,
+    transform_posts,
+    transofrm_post,
+    upload_post_image,
+)
 
 posts_api = Blueprint("posts_api", __name__, url_prefix="/posts")
 
@@ -55,8 +62,29 @@ def addPost():
         "data": {"postId": postId},
     }, 200
 
+@posts_api.route("/get", methods=["GET"])
+@api_key_required
+def getPost():
+    postId = request.args.get("postId")
 
-@posts_api.route("/get", methods=["POST"])
+    if(not postId):
+        return {}, 401
+    
+    post = find_post(postId)
+
+    if(not post):
+        return {}, 404
+    
+    user = find_user_by(None, None, ObjectId(post["userId"]))
+
+    post = transofrm_post(post)
+
+    if(user):
+        post["userDetails"] = {"username": user["username"]}
+
+    return {"data": {"post": post}}, 200
+
+@posts_api.route("/getPostsByUser", methods=["POST"])
 @api_key_required
 @token_required
 def getUserPosts():

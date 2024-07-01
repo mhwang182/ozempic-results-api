@@ -49,15 +49,18 @@ def create_post(beforeImageId, afterImageId, postDetails):
     postId = add_post(new_post_doc)
     return str(postId)
 
+def transofrm_post(post):
+    post["beforeImageUrl"] = get_presigned_url(post["beforeImageId"])
+    post["afterImageUrl"] = get_presigned_url(post["afterImageId"])
+    post["_id"] = str(post["_id"])
+    post["userId"] = str(post["userId"])
+    return post
+
 def transform_posts(posts):
 
     transformed_posts = []
 
     for post in posts:
-        post["beforeImageUrl"] = get_presigned_url(post["beforeImageId"])
-        post["afterImageUrl"] = get_presigned_url(post["afterImageId"])
-        post["_id"] = str(post["_id"])
-        post["userId"] = str(post["userId"])
-        transformed_posts.append(post)
+        transformed_posts.append(transofrm_post(post))
     
     return transformed_posts

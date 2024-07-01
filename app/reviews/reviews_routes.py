@@ -1,16 +1,22 @@
+from bson import ObjectId
 from flask import Blueprint, request
 from flask_cors import CORS
 
 from app.auth.api_key_middleware import api_key_required
 from app.auth.auth_middleware import token_required
 from app.common.utils import create_response
+from app.core.db import find_user_by
 from app.core.review_methods import (
     delete_review_from_db,
     fetch_reviews_feed,
     get_review_from_db,
     get_reviews_from_db,
 )
-from app.reviews.reviews_service import create_review, transform_reviews
+from app.reviews.reviews_service import (
+    create_review,
+    transform_review,
+    transform_reviews,
+)
 
 reviews_api = Blueprint("reviews_api", "reviews_api", url_prefix="/reviews")
 
@@ -67,7 +73,7 @@ def delete_review():
     
     return create_response("Review deleted successfully", None, None), 200
 
-@reviews_api.route("/get", methods=["POST"])
+@reviews_api.route("/listByUserId", methods=["POST"])
 @api_key_required
 @token_required
 def get_reviews_by_id():
@@ -89,6 +95,28 @@ def get_reviews_by_id():
     return {
         "data": {"reviews": reviews}
     }, 200
+
+@reviews_api.route("/get", methods=["GET"])
+@api_key_required
+def get_review_by_id():
+
+    reviewId = request.args.get("reviewId")
+
+    if(not reviewId):
+        return {"data": None}, 401
+
+    review = get_review_from_db(reviewId)
+
+    if(not review):
+        return {"data": None}, 404
+    
+    review = transform_review(review)
+    user = find_user_by(None, None, ObjectId(review["userId"]))
+
+    if(user):
+        review["userDetails"] = {"username": user["username"]}
+
+    return {"data": {"review": review}}, 200
 
 @reviews_api.route("/feed", methods=["POST"])
 @api_key_required
