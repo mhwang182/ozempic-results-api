@@ -11,8 +11,9 @@ from app.core.post_methods import (
     find_post,
     get_feed_from_db,
     get_user_posts_from_db,
-    search_posts,
 )
+from app.core.s3 import delete_image_from_s3
+from app.core.search_methods import search_posts, search_user_posts
 from app.posts.posts_service import (
     create_post,
     transform_posts,
@@ -110,10 +111,8 @@ def get_feed():
     if ("date" not in data):
         return create_response("date not found", None, None), 401
 
-    posts_aggregate_cursor = get_feed_from_db(data["date"])
-    parsed_data = (list(posts_aggregate_cursor)[0])["data"]
-
-    posts = transform_posts(parsed_data)
+    posts = get_feed_from_db(data["date"])
+    posts = transform_posts(posts)
 
     return create_response("feed posts", {"posts": posts}, None), 200
 
@@ -138,6 +137,9 @@ def delete_post():
 
     if(delete_count == 0):
         return create_response("Unable to delete post", None, None), 404
+    
+    delete_image_from_s3(post["beforeImageId"])
+    delete_image_from_s3(post["afterImageId"])
 
     return create_response("Successfully deleted post", None, None), 200
 
@@ -158,10 +160,25 @@ def get_search_results_by_medication():
     if("paginationToken" in data):
         pagination_token = data["paginationToken"]
 
-    posts_aggregate_cursor = search_posts(search_term, pagination_token)
+    posts_aggregate = search_posts(search_term, pagination_token)
 
-    posts = transform_posts(list(posts_aggregate_cursor))
+    posts = transform_posts(posts_aggregate)
 
     return {
         "data": { "posts": posts }
     }, 200
+
+@posts_api.route("/searchByUserId", methods=["POST"])
+@api_key_required
+def search_posts_by_user():
+
+    data = request.get_json()
+
+    if("userId" not in data or "date" not in data):
+        return {}, 401
+
+    posts_aggregate = search_user_posts(data["userId"], data["date"])
+    
+    posts = transform_posts(posts_aggregate)
+
+    return {"data": {"posts": posts}}, 200

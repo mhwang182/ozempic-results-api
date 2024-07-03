@@ -130,10 +130,9 @@ def get_reviews_feed():
 
     date = data["date"]
 
-    reviews = fetch_reviews_feed(date)
-    parsed_reviews = list(reviews)[0]
+    reviews_aggregate = fetch_reviews_feed(date)
 
-    reviews = transform_reviews(parsed_reviews["data"])
+    reviews = transform_reviews(reviews_aggregate)
 
     return {
         "data": {"reviews": reviews}

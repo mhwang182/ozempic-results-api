@@ -47,6 +47,7 @@ def get_user_posts_from_db(userId):
                 '$sort': {'createdAt': -1}
             }
         ])
+        posts = list(posts)
     except Exception as e:
         print(str(e))  
 
@@ -70,53 +71,7 @@ def get_feed_from_db(date):
                 ]
             }
         }])
+        posts = list(posts)[0]["data"]
     except Exception as e:
         print(str(e))
-    return posts
-
-def search_posts(search_term, pagination_token):
-
-    posts = []
-
-    search_stage = {
-        "index": "PostMedicationSearch",
-        "text": {
-            "query": search_term,
-            "path": {
-            "wildcard": "*"
-            }
-        },
-    }
-
-    if(pagination_token):
-        search_stage["searchAfter"] = pagination_token
-
-    try:
-        posts = db.Posts.aggregate([
-            {
-                "$search": search_stage
-            },
-            {
-                "$limit": 6
-            },
-            user_details_steps[0],
-            user_details_steps[1],
-            user_details_steps[2],
-            {
-                "$project": {
-                    "medicationUsed": 1,
-                    "userId": 1,
-                    "createdAt": 1,
-                    "weightLost": 1,
-                    "beforeImageId": 1,
-                    "afterImageId": 1,
-                    "caption": 1,
-                    "userDetails": 1,
-	                "paginationToken": { "$meta" : "searchSequenceToken" },
-                }
-            }
-        ])
-    except Exception as e:
-        print(str(e))
-
     return posts

@@ -6,7 +6,6 @@ from werkzeug.local import LocalProxy
 
 def upload_image_s3(image, filename):    
     try:
-        print('trying upload')
         s3.upload_fileobj(
             image,
             str(bucketName),
@@ -37,6 +36,13 @@ def get_presigned_url(imageId):
         print(str(e))
 
     return url
+
+def delete_image_from_s3(imageId):
+    id = imageId.split('>')[1]
+    try: 
+        s3.delete_object(Bucket=str(bucketName), Key=str(id))
+    except Exception as e:
+        print(str(e))
 
 
 def get_s3():

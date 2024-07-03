@@ -46,6 +46,7 @@ def get_reviews_from_db(user_id):
                 '$sort': {'createdAt': -1}
             }
         ])
+        reviews = list(reviews)[0]
     except Exception as e:
         print(str(e))
 
@@ -69,6 +70,7 @@ def fetch_reviews_feed(date):
                 ]
             }
         }])
+        reviews = list(reviews)[0]["data"]
     except Exception as e:
         print(str(e))
 
