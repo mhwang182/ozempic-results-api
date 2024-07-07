@@ -30,7 +30,7 @@ CORS(posts_api)
 @token_required
 def addPost():
     postDetails = request.form.to_dict()
-    print(postDetails)
+    # print(postDetails)
     files = request.files
 
     beforeImage = files.getlist('beforeImage')
@@ -44,6 +44,8 @@ def addPost():
 
     if(not beforeImageId or not afterImageId):
         return create_response("Post added unsuccessfully", None, "Image upload error"), 500
+
+    postDetails["userId"] = g.userId
 
     postId = create_post(beforeImageId, afterImageId, postDetails)
 
