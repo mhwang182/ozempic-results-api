@@ -31,7 +31,7 @@ def login():
     if(not user):
         return create_response("user not found", None, None), 404
     
-    response = login_user(inputEmail, inputPassword, user)
+    response = login_user(inputPassword, user)
 
     if(not response or response == None):
        return create_response("password incorrect", None, None), 401
