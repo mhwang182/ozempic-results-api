@@ -1,17 +1,17 @@
 import dateutil
 from bson import ObjectId
 
+from app.common.logging import log_message
 from app.common.utils import user_details_steps
 from app.core.db import db
 
 
 def add_post(new_post_doc):
-    print('trying post to mongo')
     postId = None
     try: 
         postId = db.Posts.insert_one(new_post_doc).inserted_id
     except Exception as e: 
-        print(str(e))
+        log_message(str(e), 'error')
 
     return postId
 
@@ -21,7 +21,7 @@ def find_post(postId):
     try:
         post = db.Posts.find_one({"_id": ObjectId(postId)})
     except Exception as e:
-        print(str(e))
+        log_message(str(e), 'error')
     
     return post
 
@@ -30,7 +30,7 @@ def delete_post_from_db(postId):
     try:
         count = db.Posts.delete_one({"_id": ObjectId(postId)}).deleted_count
     except Exception as e:
-        print(str(e))
+        log_message(str(e), 'error')
     return count
 
 def get_user_posts_from_db(userId):
@@ -49,7 +49,7 @@ def get_user_posts_from_db(userId):
         ])
         posts = list(posts)
     except Exception as e:
-        print(str(e))  
+        log_message(str(e), 'error')  
 
     return posts  
 
@@ -73,5 +73,5 @@ def get_feed_from_db(date):
         }])
         posts = list(posts)[0]["data"]
     except Exception as e:
-        print(str(e))
+        log_message(str(e), 'error')
     return posts

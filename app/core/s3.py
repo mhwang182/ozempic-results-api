@@ -3,6 +3,8 @@ from botocore.config import Config
 from flask import current_app
 from werkzeug.local import LocalProxy
 
+from app.common.logging import log_message
+
 
 def upload_image_s3(image, filename):    
     try:
@@ -13,8 +15,7 @@ def upload_image_s3(image, filename):
             ExtraArgs={'ContentType': image.content_type}
         )
     except Exception as e:
-        print('image upload error')
-        print(str(e))
+        log_message('image upload error: ' + str(e), 'error')
         return False
     return True
 
@@ -32,8 +33,7 @@ def get_presigned_url(imageId):
             ExpiresIn=3600
         )
     except Exception as e:
-        print('presigned url error')
-        print(str(e))
+        log_message('presigned url error: ' + str(e), 'error')
 
     return url
 
@@ -42,8 +42,7 @@ def delete_image_from_s3(imageId):
     try: 
         s3.delete_object(Bucket=str(bucketName), Key=str(id))
     except Exception as e:
-        print(str(e))
-
+        log_message(str(e), 'error')
 
 def get_s3():
     S3_access_key_id = current_app.config['S3_ACCESS_KEY_ID']

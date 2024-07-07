@@ -1,6 +1,7 @@
 import dateutil
 from bson import ObjectId
 
+from app.common.logging import log_message
 from app.common.utils import user_details_steps
 from app.core.db import db
 
@@ -10,7 +11,7 @@ def add_review(new_review_doc):
     try:
         post_id = db.Reviews.insert_one(new_review_doc).inserted_id
     except Exception as e:
-        print(str(e))
+        log_message(str(e), 'error')
     
     return post_id
 
@@ -19,7 +20,7 @@ def get_review_from_db(reviewId):
     try:
         review = db.Reviews.find_one({"_id": ObjectId(reviewId)})
     except Exception as e:
-        print(str(e))
+        log_message(str(e), 'error')
     
     return review
 
@@ -28,7 +29,7 @@ def delete_review_from_db(reviewId):
     try:
         deleted_count = db.Reviews.delete_one({"_id": ObjectId(reviewId)}).deleted_count
     except Exception as e:
-        print(str(e))
+        log_message(str(e), 'error')
 
     return deleted_count
 
@@ -46,9 +47,9 @@ def get_reviews_from_db(user_id):
                 '$sort': {'createdAt': -1}
             }
         ])
-        reviews = list(reviews)[0]
+        reviews = list(reviews)
     except Exception as e:
-        print(str(e))
+        log_message(str(e), 'error')
 
     return reviews
 
@@ -72,6 +73,6 @@ def fetch_reviews_feed(date):
         }])
         reviews = list(reviews)[0]["data"]
     except Exception as e:
-        print(str(e))
+        log_message(str(e), 'error')
 
     return reviews

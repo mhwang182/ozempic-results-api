@@ -1,5 +1,5 @@
 from bson import ObjectId
-from flask import Blueprint, request
+from flask import Blueprint, g, request
 from flask_cors import CORS
 
 from app.auth.api_key_middleware import api_key_required
@@ -43,25 +43,14 @@ def addPost():
     afterImageId = upload_post_image(afterImage[0])
 
     if(not beforeImageId or not afterImageId):
-        return  {
-            "message": "post added unsuccessfully",
-            "data": None,
-            "error": "image upload error"
-        }, 500
+        return create_response("Post added unsuccessfully", None, "Image upload error"), 500
 
     postId = create_post(beforeImageId, afterImageId, postDetails)
 
     if(not postId):
-        return  {
-        "message": "post added unsuccessfully",
-        "data": None,
-        "error": "mongodb error"
-    }, 500
+        return create_response("Post added unsuccessfully", None, "Mongo insertion unsucessful"), 500
 
-    return  {
-        "message": "added post successfully",
-        "data": {"postId": postId},
-    }, 200
+    return create_response("Added post successfully", {"postId": postId}, None), 200
 
 @posts_api.route("/get", methods=["GET"])
 @api_key_required
@@ -69,12 +58,12 @@ def getPost():
     postId = request.args.get("postId")
 
     if(not postId):
-        return {}, 401
+        return create_response("Incorrect request data", None, None), 400
     
     post = find_post(postId)
 
     if(not post):
-        return {}, 404
+        return create_response("Post not found", None, None), 404
     
     user = find_user_by(None, None, ObjectId(post["userId"]))
 
@@ -83,25 +72,20 @@ def getPost():
     if(user):
         post["userDetails"] = {"username": user["username"]}
 
-    return {"data": {"post": post}}, 200
+    return create_response("Post returned successfully", {"post": post}, None), 200
 
 @posts_api.route("/getPostsByUser", methods=["POST"])
 @api_key_required
 @token_required
 def getUserPosts():
-    data = request.get_json()
 
-    if( "userId" not in data):
-        return {
-            "data": None
-        }, 401
+    if( "userId" not in g):
+        return create_response("Incorrect request data", None, None), 400
     
-    posts = get_user_posts_from_db(data["userId"])
+    posts = get_user_posts_from_db(g.userId)
     posts = transform_posts(posts)
 
-    return {
-        "data": {"posts": posts}
-    }, 200
+    return create_response("Posts returned successfully", {"posts": posts}, None), 200
 
 @posts_api.route("/feed", methods=["POST"])
 @api_key_required
@@ -109,12 +93,12 @@ def get_feed():
     data = request.get_json()
 
     if ("date" not in data):
-        return create_response("date not found", None, None), 401
+        return create_response("Incorrect request data", None, None), 401
 
     posts = get_feed_from_db(data["date"])
     posts = transform_posts(posts)
 
-    return create_response("feed posts", {"posts": posts}, None), 200
+    return create_response("Posts returned successfully", {"posts": posts}, None), 200
 
 @posts_api.route("/delete", methods=["POST"])
 @token_required
@@ -122,16 +106,18 @@ def get_feed():
 def delete_post():
     data = request.get_json()
 
-    if("postId" not in data or "userId" not in data):
-        return create_response("", None, None), 401
+    if("postId" not in data or "userId" not in g):
+        return create_response("Incorrect request data", None, None), 401
+    
+    userId = g.userId
     
     post = find_post(data["postId"])
 
     if(not post):
-        return create_response("", None, None), 404
+        return create_response("Incorrect request data", None, None), 404
     
-    if(str(post["userId"]) != data["userId"]):
-        return create_response("", None, None), 401
+    if(str(post["userId"]) != userId):
+        return create_response("Not Authorized to delete post", None, None), 401
     
     delete_count = delete_post_from_db(data["postId"])
 
@@ -141,7 +127,7 @@ def delete_post():
     delete_image_from_s3(post["beforeImageId"])
     delete_image_from_s3(post["afterImageId"])
 
-    return create_response("Successfully deleted post", None, None), 200
+    return create_response("Post deleted successfully", None, None), 200
 
 @posts_api.route("/search", methods=["POST"])
 @api_key_required
@@ -150,9 +136,7 @@ def get_search_results_by_medication():
     data = request.get_json()
 
     if("searchTerm" not in data):
-        return {
-            "data": None
-        }, 401
+        return create_response("Incorrect request data", None, None), 401
 
     search_term = data["searchTerm"]
 
@@ -164,9 +148,7 @@ def get_search_results_by_medication():
 
     posts = transform_posts(posts_aggregate)
 
-    return {
-        "data": { "posts": posts }
-    }, 200
+    return create_response("Posts returned successfully", {"posts": posts}, None), 200
 
 @posts_api.route("/searchByUserId", methods=["POST"])
 @api_key_required
@@ -175,10 +157,10 @@ def search_posts_by_user():
     data = request.get_json()
 
     if("userId" not in data or "date" not in data):
-        return {}, 401
+        return create_response("Incorrect request data", None, None), 401
 
     posts_aggregate = search_user_posts(data["userId"], data["date"])
     
     posts = transform_posts(posts_aggregate)
 
-    return {"data": {"posts": posts}}, 200
+    return create_response("Posts returned successfully", {"posts": posts}, None), 200

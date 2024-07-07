@@ -1,6 +1,8 @@
 from functools import wraps
 
-from flask import current_app, request
+from flask import current_app, g, request
+
+from app.common.utils import create_response
 
 
 def api_key_required(func):
@@ -8,22 +10,14 @@ def api_key_required(func):
     def before_func(*args, **kwargs):
 
         if('X_API_KEY' not in request.headers):
-            print('API key not found')
-            return {
-                "message": "API Key not found",
-                "data": None,
-                "error": "Unauthorized"
-            }, 401
+            return create_response("Unauthorized", None, "API Key not found"), 401
         
         request_api_key = request.headers["X_API_KEY"]
         if(request_api_key != current_app.config["API_KEY"]):
-            print('Incorrect API key')
-            return {
-                "message": "Incorrect Api Key",
-                "data": None,
-                "error": "Unauthorized"
-            }, 401
+            return create_response("Unauthorized", None, "Incorrect API Key"), 401
         
+        g.test = "hello world"
+
         return func(*args, **kwargs)
 
     return before_func

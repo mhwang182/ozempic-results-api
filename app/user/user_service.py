@@ -1,5 +1,6 @@
 import bcrypt
 import jwt
+from flask import current_app
 
 from app.core.db import add_user
 
@@ -16,18 +17,18 @@ def create_user_dto(user):
 def passwords_match(plain_text_password, hashed_password):
     return bcrypt.checkpw(plain_text_password.encode('ASCII'), hashed_password.encode('ASCII'))
 
-def create_jwt_token(email):
+def create_jwt_token(userId):
     return jwt.encode({
-                "email": email,
+                "id": str(userId),
                 "timestamp": ""
             }, 
-            "secret", 
+            current_app.config["JWT_KEY"], 
             algorithm="HS256")
 
 
-def login_user(email, password, user):
+def login_user(password, user):
     if(passwords_match(password, user["password"])):
-        token = create_jwt_token(email)
+        token = create_jwt_token(user["_id"])
         userDto = create_user_dto(user)
         return { 
             "user": userDto, 
@@ -43,7 +44,7 @@ def create_user(new_user_dto):
     objectId = add_user(new_user_dto, hashed_password.decode('ASCII'))
 
     if(objectId):
-        token = create_jwt_token(new_user_dto["email"])
+        token = create_jwt_token(objectId)
         new_user_dto["_id"] = objectId
         return {
             "user": create_user_dto(new_user_dto),

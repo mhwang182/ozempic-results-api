@@ -3,6 +3,8 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from werkzeug.local import LocalProxy
 
+from app.common.logging import log_message
+
 
 def getUser(email):
     user = db.Users.find_one({"email": email})
@@ -35,7 +37,7 @@ def find_user_by(email, username, userId):
         return users[0]
             
     except Exception as e:
-        print(str(e))
+        log_message(str(e), 'error')
     
     return {}
     
@@ -52,7 +54,7 @@ def add_user(new_user, hashed_password):
     try:
         objectId = db.Users.insert_one(user_doc).inserted_id
     except Exception as e:
-        print(str(e))
+        log_message(str(e), 'error')
     
     return objectId
 

@@ -1,6 +1,7 @@
 import dateutil
 from bson import ObjectId
 
+from app.common.logging import log_message
 from app.common.utils import user_details_steps
 from app.core.db import db
 
@@ -69,6 +70,6 @@ def search_user_posts(userId, date):
 
         posts = list(posts)
     except Exception as e:
-        print(str(e))
+        log_message(str(e), 'error')
 
     return posts

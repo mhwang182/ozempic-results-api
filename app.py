@@ -34,7 +34,7 @@ app.config['S3_ENDPOINT_URL'] = os.getenv("S3_ENDPOINT_URL")
 app.config['API_KEY'] = os.getenv("API_KEY")
 app.config['SIGN_UP_CODE'] = os.getenv("SIGN_UP_CODE")
 port = os.getenv("PORT")
-print(port)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=port)

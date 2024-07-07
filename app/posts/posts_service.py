@@ -5,6 +5,7 @@ from datetime import datetime
 import blurhash
 from bson.objectid import ObjectId
 
+from app.common.logging import log_message
 from app.core.post_methods import add_post
 from app.core.s3 import get_presigned_url, upload_image_s3
 
@@ -23,7 +24,7 @@ def upload_post_image(image):
     try:
         img_blurhash = blurhash.encode(image, x_components=3, y_components=3)
     except Exception as e:
-        print(str(e))
+        log_message(str(e), 'error')
 
     image.seek(0) #reset file pointer
 

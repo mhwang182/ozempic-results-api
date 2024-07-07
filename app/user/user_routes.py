@@ -3,6 +3,7 @@ from flask_cors import CORS
 
 from app.auth.api_key_middleware import api_key_required
 from app.auth.signup_code_middleware import signup_code_required
+from app.common.utils import create_response
 from app.core.db import find_user_by, getUser
 from app.user.user_service import create_user, login_user
 
@@ -13,25 +14,27 @@ CORS(user_api)
 @user_api.route('/login', methods=['POST'])
 @api_key_required
 def login():
-    data = request.get_json()["credentials"]
-    inputEmail = data["email"]
-    inputPassword = data["password"]
+
+    data = request.get_json()
+
+    if("credentials" not in data):
+        return create_response("Incorrect request data", None, None), 400
+    
+    if("email" not in data["credentials"] or "password" not in data["credentials"]):
+        return create_response("Incorrect request data", None, None), 400
+    
+    inputEmail = data["credentials"]["email"]
+    inputPassword = data["credentials"]["password"]
 
     user = getUser(inputEmail)
 
     if(not user):
-        return {
-        "message": "user not found",
-        "data": None,
-    }, 401
+        return create_response("user not found", None, None), 404
     
     response = login_user(inputEmail, inputPassword, user)
 
-    if(not response):
-       return {
-           "message": "password incorrect",
-           "data": None
-       }, 404
+    if(not response or response == None):
+       return create_response("password incorrect", None, None), 401
     
     return response, 200
 
@@ -45,14 +48,11 @@ def createUser():
     user = find_user_by(new_user_dto["email"], new_user_dto["username"], None)
 
     if(user):
-        return {
-            "message": "user already exists",
-            "data": None
-        }, 403
+        return create_response("User already exists"), 400
     
     response = create_user(new_user_dto)
 
-    if(response):
-        return response, 201
-
-    return {}, 404
+    if(not response):
+        return create_response("User not created", None, "Unable to create new user")
+        
+    return response, 201
